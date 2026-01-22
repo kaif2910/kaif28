@@ -7,7 +7,7 @@ const app = express();
 const port = process.env.PORT || 5500; // Use process.env.PORT for Render
 const host = '0.0.0.0';
 
-const UPLOAD_PASSWORD = '1234';
+const UPLOAD_PASSWORD = process.env.UPLOAD_PASSWORD || '1234';
 const NOTES_DIR = path.join(__dirname, 'notes');
 
 
