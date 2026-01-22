@@ -101,9 +101,9 @@ app.get('/shaalaa', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'notes_buddy.html'));
 });
 
-// Fallback to serve index.html for any other request (original design)
+// Fallback to serve notes_buddy.html for any other request
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'notes_buddy.html'));
 });
 
 app.listen(port, () => {
