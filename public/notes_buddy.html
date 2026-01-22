@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>noteshelf</title>
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css" />
+    <style>
+        :root {
+            --primary-color: #26a69a; /* Teal-ish like Shaalaa might use, or standard edu blue */
+            --secondary-color: #f4f4f4;
+            --text-color: #333;
+            --border-color: #ddd;
+            --header-height: 60px;
+            /* Dark Mode Colors */
+            --dark-bg: #18191a;
+            --dark-surface: #242526;
+            --dark-text: #e4e6eb;
+            --dark-border: #393a3b;
+        }
+            
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+    
+            body {
+                background-color: #f9f9f9;
+                color: var(--text-color);
+                padding-top: var(--header-height);
+                transition: background-color 0.3s, color 0.3s;
+                overflow-x: hidden;
+            }
+
+            img {
+                max-width: 100%;
+            }
+    
+            /* Header */
+            header {
+                background-color: #fff;
+                height: var(--header-height);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                position: fixed;
+                top: 0;
+                width: 100%;
+                z-index: 1000;
+                transition: background-color 0.3s;
+            }
+    
+            .logo {
+                font-size: 24px;
+                font-weight: bold;
+                color: var(--primary-color);
+                text-decoration: none;
+            }
+    
+            .header-right {
+                display: flex;
+                gap: 15px;
+                align-items: center;
+            }
+
+            /* Hamburger Menu Icon */
+            .hamburger {
+                display: none;
+                cursor: pointer;
+                flex-direction: column;
+                gap: 4px;
+            }
+            .hamburger div {
+                width: 25px;
+                height: 3px;
+                background-color: var(--text-color);
+                border-radius: 3px;
+            }
+    
+            .search-bar {
+                display: none; /* Hidden on mobile */
+            }
+            
+            @media (min-width: 768px) {
+                .search-bar {
+                    display: block;
+                }
+            }
+    
+            .search-bar input {
+                padding: 8px;
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+                width: 300px;
+            }
+    
+            .btn {
+                padding: 8px 16px;
+                border-radius: 4px;
+                text-decoration: none;
+                font-size: 14px;
+                cursor: pointer;
+                border: none;
+                transition: background-color 0.3s, color 0.3s;
+            }
+    
+            .btn-primary {
+                background-color: var(--primary-color);
+                color: white;
+            }
+    
+            .btn-outline {
+                border: 1px solid var(--primary-color);
+                color: var(--primary-color);
+                background: white;
+            }
+    
+            /* Layout */
+            .container {
+                display: flex;
+                margin: 20px auto;
+                gap: 20px;
+                padding: 0 20px;
+            }
+    
+            /* Sidebar */
+            aside {
+                width: 250px;
+                display: none; /* Hidden on small screens */
+                flex-shrink: 0;
+            }
+    
+            @media (min-width: 768px) {
+                aside {
+                    display: block;
+                }
+                .hamburger {
+                    display: none;
+                }
+                .header-right .btn-outline, .header-right .btn-primary {
+                    display: inline-block;
+                }
+            }
+             @media (max-width: 767px) {
+                .header-right .btn:not(#dark-mode-toggle) {
+                    display: none;
+                }
+                .hamburger {
+                    display: flex;
+                }
+                .container {
+                    flex-direction: column;
+                }
+                aside {
+                    display: none;
+                }
+            }
+
+
+            /* Mobile Nav */
+            .mobile-nav {
+                position: fixed;
+                top: 0;
+                left: -280px; /* Start off-screen */
+                width: 280px;
+                height: 100%;
+                background: white;
+                z-index: 1002;
+                transition: left 0.3s ease-in-out;
+                box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+            }
+            .mobile-nav.open {
+                left: 0;
+            }
+            #nav-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 1001;
+                display: none;
+            }
+
+
+            .nav-menu {
+                background: white;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                overflow: hidden;
+                transition: background-color 0.3s, border-color 0.3s;
+            }
+    
+            .nav-menu ul {
+                list-style: none;
+            }
+            
+            .nav-menu li.nav-heading {
+                padding: 10px 15px;
+                font-size: 11px;
+                font-weight: bold;
+                color: #999;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border-bottom: 1px solid #eee;
+            }
+    
+            .nav-menu li a {
+                display: block;
+                padding: 12px 15px;
+                text-decoration: none;
+                color: var(--text-color);
+                border-bottom: 1px solid #eee;
+                cursor: pointer;
+                transition: background-color 0.3s, color 0.3s;
+            }
+    
+            .nav-menu li a:hover {
+                background-color: #f0f0f0;
+                color: var(--primary-color);
+            }
+            
+            .nav-menu li a.active {
+                background-color: var(--primary-color);
+                color: white;
+                font-weight: 500;
+            }
+    
+            /* Main Content */
+            main {
+                flex-grow: 1;
+                width: 100%;
+            }
+    
+            /* Upload Section (Admin Panel Style) */
+            .upload-card {
+                background: white;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 20px;
+                margin-bottom: 20px;
+                transition: background-color 0.3s, border-color 0.3s;
+            }
+    
+            .upload-card h2 {
+                margin-bottom: 15px;
+                font-size: 18px;
+                border-bottom: 2px solid var(--primary-color);
+                display: inline-block;
+                padding-bottom: 5px;
+            }
+    
+            #upload-feedback {
+                padding: 12px;
+                border-radius: 4px;
+                font-weight: 500;
+                margin-bottom: 15px;
+                display: none; /* Hidden by default */
+            }
+            #upload-feedback.success {
+                background-color: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            #upload-feedback.error {
+                background-color: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+    
+            .upload-form {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+    
+            .form-group {
+                display: flex;
+                flex-direction: column;
+            }
+    
+            .form-group label {
+                margin-bottom: 5px;
+                font-weight: 500;
+            }
+    
+            .form-group input, .form-group select {
+                padding: 10px;
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+                transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+            }
+    
+            /* Notes Grid & Spinner */
+            .notes-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 20px;
+                position: relative;
+                min-height: 100px;
+            }
+    
+            .spinner {
+                border: 5px solid #f3f3f3;
+                border-top: 5px solid var(--primary-color);
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                animation: spin 1s linear infinite;
+                position: absolute;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+    
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+    
+            .note-card {
+                background: white;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 20px;
+                transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s, border-color 0.3s;
+            }
+    
+            .note-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+    
+            .note-card h3 {
+                font-size: 16px;
+                margin-bottom: 10px;
+                color: #333;
+                height: 40px; /* limit height */
+                overflow: hidden;
+            }
+    
+            .note-meta {
+                font-size: 12px;
+                color: #777;
+                margin-bottom: 15px;
+            }
+    
+            .download-link {
+                display: block;
+                text-align: center;
+                background-color: var(--primary-color);
+                color: white;
+                padding: 8px;
+                border-radius: 4px;
+                text-decoration: none;
+                font-weight: 500;
+            }
+            
+            .download-link:hover {
+                background-color: #219187;
+            }
+    
+            /* Footer */
+            footer {
+                background-color: #333;
+                color: white;
+                padding: 40px 20px;
+                margin-top: 40px;
+            }
+    
+            .footer-content {
+                max-width: 1200px;
+                margin: 0 auto;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+            }
+    
+            .footer-col h4 {
+                margin-bottom: 15px;
+                color: #ccc;
+            }
+    
+            .footer-col ul {
+                list-style: none;
+            }
+    
+            .footer-col ul li {
+                margin-bottom: 8px;
+            }
+    
+            .footer-col ul li a {
+                color: #999;
+                text-decoration: none;
+            }
+    
+            .footer-col ul li a:hover {
+                color: white;
+            }
+    
+            .copyright {
+                text-align: center;
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #444;
+                color: #777;
+            }
+    
+            /* Dark Mode Styles */
+            body.dark-mode {
+                background-color: var(--dark-bg);
+                color: var(--dark-text);
+            }
+    
+            .dark-mode header,
+            .dark-mode .nav-menu,
+            .dark-mode .upload-card,
+            .dark-mode .note-card,
+            .dark-mode #home-section,
+            .dark-mode .mobile-nav {
+                background: var(--dark-surface);
+                border-color: var(--dark-border);
+            }
+            
+            .dark-mode #home-section {
+                 padding: 20px; 
+                 border-radius: 8px;
+                 border: 1px solid var(--dark-border);
+            }
+    
+            .dark-mode header {
+                box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            }
+    
+            .dark-mode .nav-menu li a {
+                color: var(--dark-text);
+                border-bottom-color: var(--dark-border);
+            }
+            
+            .dark-mode .nav-menu li.nav-heading {
+                 border-bottom-color: var(--dark-border);
+            }
+    
+            .dark-mode .nav-menu li a:hover {
+                background-color: #3e3f40;
+            }
+    
+            .dark-mode .nav-menu li a.active {
+                background-color: var(--primary-color);
+                color: white;
+            }
+    
+            .dark-mode h2 {
+                border-bottom-color: var(--dark-border) !important;
+            }
+            
+            .dark-mode .upload-card h2 {
+                 border-bottom-color: var(--primary-color) !important;
+            }
+            
+            .dark-mode .btn-outline {
+                color: var(--primary-color);
+                background: transparent;
+            }
+            
+            .dark-mode .btn-outline:hover {
+                 background: rgba(38, 166, 154, 0.1);
+            }
+    
+            .dark-mode .form-group input, 
+            .dark-mode .form-group select {
+                background-color: #3e3f40;
+                border-color: var(--dark-border);
+                color: var(--dark-text);
+            }
+    
+            .dark-mode .note-card h3, .dark-mode #home-section h3, .dark-mode #home-section p {
+                color: var(--dark-text);
+            }
+    
+            .dark-mode .note-meta {
+                color: #aaa;
+            }
+            
+            .dark-mode .note-card:hover {
+                box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            }
+    
+            .dark-mode footer {
+                background-color: #1a1a1a;
+            }
+            
+            .dark-mode .copyright {
+                border-top-color: var(--dark-border);
+            }
+
+            .dark-mode .hamburger div {
+                background-color: var(--dark-text);
+            }
+            .swiper-slide {
+                position: relative; /* Required for absolute positioning of caption */
+            }
+            .swiper-slide img {
+                width: 100%;
+                object-fit: contain; /* Contain the image within the frame */
+                border-radius: 8px; /* Rounded corners for images */
+            }
+
+            @media (max-width: 767px) {
+                .swiper {
+                    height: 250px; /* Increased height for mobile, more like a poster */
+                }
+                .swiper-caption {
+                    font-size: 1em; /* Smaller font size for mobile */
+                    padding: 8px;
+                }
+            }
+    
+        </style>
+</head>
+<body>
+    <div id="nav-overlay"></div>
+    <header>
+        <a href="#" class="logo">noteshelf</a>
+        
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Search for notes, subjects...">
+        </div>
+
+        <div class="header-right">
+             <div class="hamburger">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <a href="#" id="dark-mode-toggle" class="btn btn-outline">Dark Mode</a>
+        </div>
+    </header>
+
+     <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+         <div class="nav-menu">
+            <ul>
+                <li><a class="section-link" onclick="showSection('home'); closeNav();">Home</a></li>
+                <li class="nav-heading">DEPARTMENTS</li>
+                <li><a class="section-link" onclick="showSection('bscit'); closeNav();">BSCIT</a></li>
+                <li><a class="section-link" onclick="showSection('bsc_cs'); closeNav();">BSC CS</a></li>
+                <li><a class="section-link" onclick="showSection('bsc_ds'); closeNav();">BSC DS</a></li>
+                <li><a class="section-link" onclick="showSection('bsc_aiml'); closeNav();">BSC AI/ML</a></li>
+                <li><a class="section-link" onclick="showSection('question_papers'); closeNav();">Question Papers</a></li>
+                <li class="nav-heading">Admin</li>
+                <li><a id="mobile-admin-panel-toggle">Admin Panel</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" data-aos="fade-up">
+        <!-- Sidebar Navigation -->
+        <aside>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a id="nav-home" class="section-link" onclick="showSection('home')">Home</a></li>
+                    <li class="nav-heading">DEPARTMENTS</li>
+                    <li><a id="nav-bscit" class="section-link" onclick="showSection('bscit')">BSCIT</a></li>
+                    <li><a id="nav-bsc_cs" class="section-link" onclick="showSection('bsc_cs')">BSC CS</a></li>
+                    <li><a id="nav-bsc_ds" class="section-link" onclick="showSection('bsc_ds')">BSC DS</a></li>
+                    <li><a id="nav-bsc_aiml" class="section-link" onclick="showSection('bsc_aiml')">BSC AI/ML</a></li>
+                    <li><a id="nav-question_papers" class="section-link" onclick="showSection('question_papers')">Question Papers</a></li>
+                    <li><a id="admin-panel-toggle">Admin Panel</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Admin Panel (hidden by default) -->
+            <section id="admin-panel" class="upload-card" style="display: none;" data-aos="fade-up">
+                <h2>Upload Study Material</h2>
+                <div id="upload-feedback"></div>
+                <form id="uploadForm" class="upload-form">
+                    <div class="form-group">
+                        <label for="password">Admin Password</label>
+                        <input type="password" id="password" name="password" placeholder="Enter password" required>
+                    </div>
+                     <div class="form-group">
+                        <label for="department">Department</label>
+                        <select id="department" name="department" required>
+                            <option value="bscit">BSCIT</option>
+                            <option value="bsc_cs">BSC CS</option>
+                            <option value="bsc_ds">BSC DS</option>
+                            <option value="bsc_aiml">BSC AI/ML</option>
+                            <option value="question_papers">Question Papers</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="note">Select PDF File</label>
+                        <input type="file" id="note" name="note" accept=".pdf" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload Note</button>
+                </form>
+            </section>
+
+            <!-- Content Sections -->
+            <div id="content-sections">
+                <section id="home-section">
+                    <h2 style="margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #ddd;"><span id="typed-headline"></span></h2>
+                    <h3 style="font-weight: bold; font-size: 1.8em; margin-bottom: 20px;">AVLABLE FACULTIES!</h3>
+                    <div class="swiper">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide">
+                                <img src="bscit.jpeg" alt="BSc IT course image">
+                                <div class="swiper-caption">BSc IT</div>
+                            </div>
+                            <div class="swiper-slide">
+                                <img src="ai ml.jpeg" alt="AI & ML course image">
+                                <div class="swiper-caption">AI & ML</div>
+                            </div>
+                            <div class="swiper-slide">
+                                <img src="ds.jpeg" alt="Data Science course image">
+                                <div class="swiper-caption">Data Science</div>
+                            </div>
+                            <div class="swiper-slide">
+                                <img src="cs.jpeg" alt="computer science course image">
+                                <div class="swiper-caption">cs</div>
+                            </div>
+                        </div>
+                        <div class="swiper-pagination"></div>
+                    </div>
+                    <h3 style="margin-top: 20px;">Our Mission</h3>
+                    <p>We are dedicated to providing high-quality, accessible study materials for students across various departments. Explore the sections to find what you need to succeed in your academic journey!</p>
+                </section>
+
+                <section id="bscit-section" style="display: none;">
+                    <h2 style="margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">BSCIT - Notes & Solutions</h2>
+                    <div class="notes-grid"></div>
+                </section>
+
+                <section id="bsc_cs-section" style="display: none;">
+                     <h2 style="margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">BSC CS - Notes & Solutions</h2>
+                    <div class="notes-grid"><p>Coming Soon...</p></div>
+                </section>
+
+                <section id="bsc_ds-section" style="display: none;">
+                     <h2 style="margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">BSC DS - Notes & Solutions</h2>
+                    <div class="notes-grid"><p>Coming Soon...</p></div>
+                </section>
+
+                <section id="bsc_aiml-section" style="display: none;">
+                     <h2 style="margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">BSC AI/ML - Notes & Solutions</h2>
+                    <div class="notes-grid"><p>Coming Soon...</p></div>
+                </section>
+
+                <section id="question_papers-section" style="display: none;">
+                     <h2 style="margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">Question Papers</h2>
+                    <div class="notes-grid"><p>Coming Soon...</p></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-col" data-aos="fade-up">
+                <h4>About Us</h4>
+                <ul>
+                    <li><a href="#">Our Story</a></li>
+                    <li><a href="#">Contact US</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-col" data-aos="fade-up">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="#">Question Papers</a></li>
+                    <li><a href="#">Textbook Solutions</a></li>
+                    <li><a href="#">PRACTICAL BOOKS </a></li>
+                </ul>
+            </div>
+            <div class="footer-col" data-aos="fade-up">
+                <h4>language</h4>
+                <ul>
+                    <li><a href="#">C</a></li>
+                    <li><a href="#">C++</a></li>
+                    <li><a href="#">PYTHON</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2026 noteshelf.COM. All rights reserved.
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/vanilla-tilt@1.8.0/dist/vanilla-tilt.min.js"></script>
+    <script>
+        const swiper = new Swiper('.swiper', {
+          direction: 'horizontal',
+          loop: true,
+          autoplay: {
+            delay: 3000,
+            disableOnInteraction: false,
+          },
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+        });
+        AOS.init(); // Initialize AOS
+        const uploadForm = document.getElementById('uploadForm');
+        const adminPanelToggle = document.getElementById('admin-panel-toggle');
+        const mobileAdminPanelToggle = document.getElementById('mobile-admin-panel-toggle');
+        const adminPanel = document.getElementById('admin-panel');
+        const allSections = document.querySelectorAll('#content-sections > section');
+        const navLinks = document.querySelectorAll('.nav-menu li a.section-link');
+        const feedbackDiv = document.getElementById('upload-feedback');
+        const hamburger = document.querySelector('.hamburger');
+        const mobileNav = document.querySelector('.mobile-nav');
+        const navOverlay = document.getElementById('nav-overlay');
+
+        function openNav() {
+            mobileNav.classList.add('open');
+            navOverlay.style.display = 'block';
+        }
+
+        function closeNav() {
+            mobileNav.classList.remove('open');
+            navOverlay.style.display = 'none';
+        }
+
+        hamburger.addEventListener('click', openNav);
+        navOverlay.addEventListener('click', closeNav);
+
+
+        function showSection(sectionId) {
+            // Hide all content sections
+            allSections.forEach(sec => sec.style.display = 'none');
+            
+            // Update active class on nav links
+            navLinks.forEach(link => link.classList.remove('active'));
+            const activeLink = document.getElementById('nav-' + sectionId);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+
+            const sectionToShow = document.getElementById(sectionId + '-section');
+            if (sectionToShow) {
+                sectionToShow.style.display = 'block';
+                // If it's a department section (not home), fetch its notes.
+                if(sectionId !== 'home') {
+                    fetchNotes(sectionId);
+                }
+            }
+             adminPanel.style.display = 'none';
+        }
+        
+        function toggleAdminPanel(e) {
+            e.preventDefault();
+            closeNav(); // Close mobile nav if open
+            // Hide all other sections before showing admin panel
+            allSections.forEach(sec => sec.style.display = 'none');
+            adminPanel.style.display = (adminPanel.style.display === 'none') ? 'block' : 'none';
+            feedbackDiv.style.display = 'none'; // Hide feedback when toggling
+        }
+
+        adminPanelToggle.addEventListener('click', toggleAdminPanel);
+        mobileAdminPanelToggle.addEventListener('click', toggleAdminPanel);
+
+
+        function showUploadFeedback(message, isError = false) {
+            feedbackDiv.textContent = message;
+            feedbackDiv.className = isError ? 'error' : 'success';
+            feedbackDiv.style.display = 'block';
+        }
+
+        function renderNotes(notes, department) {
+            const notesGrid = document.querySelector(`#${department}-section .notes-grid`);
+            if (!notesGrid) return;
+
+            notesGrid.innerHTML = ''; // Clear spinner or previous content
+            
+            if (notes.length === 0) {
+                notesGrid.innerHTML = '<p>No notes available for this department yet.</p>';
+                return;
+            }
+
+            notes.forEach(note => {
+                const card = document.createElement('div');
+                card.className = 'note-card';
+                card.setAttribute('data-aos', 'fade-up');
+                card.setAttribute('data-tilt', '');
+                const title = note.title || note.fileName;
+                const fileType = 'PDF Document';
+                
+                card.innerHTML = `
+                    <h3>${title}</h3>
+                    <div class="note-meta">${fileType}</div>
+                    <a href="/notes/${department}/${note.fileName}" class="download-link" download="${note.fileName}">
+                        Download PDF
+                    </a>
+                `;
+                notesGrid.appendChild(card);
+            });
+        }
+
+        function fetchNotes(department) {
+            const notesGrid = document.querySelector(`#${department}-section .notes-grid`);
+            if (!notesGrid) return;
+
+            notesGrid.innerHTML = '<div class="spinner"></div>'; // Show spinner
+
+            fetch(`/api/notes?department=${department}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(notes => {
+                    renderNotes(notes, department);
+                    AOS.refresh(); // Refresh AOS after new content is rendered
+                    // Initialize VanillaTilt for newly rendered note cards
+                    VanillaTilt.init(notesGrid.querySelectorAll(".note-card"));
+                })
+                .catch(error => {
+                    console.error('Error fetching notes:', error);
+                    if (notesGrid) {
+                        notesGrid.innerHTML = '<p style="color: red;">Failed to load notes. Is the server running correctly?</p>';
+                    }
+                });
+                   }
+
+
+        
+        uploadForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const formData = new FormData(uploadForm);
+            const department = formData.get('department');
+            const submitBtn = uploadForm.querySelector('button');
+            const originalText = submitBtn.textContent;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Uploading...';
+            feedbackDiv.style.display = 'none'; // Hide old feedback
+
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) return response.text();
+                if (response.status === 401) throw new Error('Incorrect password.');
+                throw new Error('Upload failed. Please try again.');
+            })
+            .then(message => {
+                showUploadFeedback(message, false);
+                uploadForm.reset();
+                showSection(department); 
+            })
+            .catch(error => {
+                showUploadFeedback(error.message, true);
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            });
+        });
+
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+
+        darkModeToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.body.classList.toggle('dark-mode');
+            
+            if(document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+                darkModeToggle.textContent = 'Light Mode';
+            } else {
+                localStorage.setItem('theme', 'light');
+                darkModeToggle.textContent = 'Dark Mode';
+            }
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.textContent = 'Light Mode';
+        }
+
+        new Typed('#typed-headline', {
+            strings: ["Welcome to noteshelf!", "<b>padhlo chahe kahin se concepts clear honge yahin se</b>"],
+            typeSpeed: 50,
+            backSpeed: 25,
+            loop: true,
+            showCursor: true,
+            cursorChar: '|',
+        });
+
+        // Load home page on startup
+        showSection('home');
+
+        const searchInput = document.getElementById('search-input');
+        const departmentNotes = {};
+        let currentDepartment = '';
+
+        function renderNotes(notes, department) {
+            const notesGrid = document.querySelector(`#${department}-section .notes-grid`);
+            if (!notesGrid) return;
+
+            notesGrid.innerHTML = ''; // Clear spinner or previous content
+            
+            if (notes.length === 0) {
+                notesGrid.innerHTML = '<p>No notes available for this department yet.</p>';
+                return;
+            }
+
+            notes.forEach(note => {
+                const card = document.createElement('div');
+                card.className = 'note-card';
+                card.setAttribute('data-aos', 'fade-up');
+                card.setAttribute('data-tilt', '');
+                const title = note.title || note.fileName;
+                const fileType = 'PDF Document';
+                
+                card.innerHTML = `
+                    <h3>${title}</h3>
+                    <div class="note-meta">${fileType}</div>
+                    <a href="/notes/${department}/${note.fileName}" class="download-link" download="${note.fileName}">
+                        Download PDF
+                    </a>
+                `;
+                notesGrid.appendChild(card);
+            });
+        }
+
+        function fetchNotes(department) {
+            currentDepartment = department;
+            const notesGrid = document.querySelector(`#${department}-section .notes-grid`);
+            if (!notesGrid) return;
+
+            notesGrid.innerHTML = '<div class="spinner"></div>'; // Show spinner
+
+            fetch(`/api/notes?department=${department}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(notes => {
+                    departmentNotes[department] = notes;
+                    renderNotes(notes, department);
+                    AOS.refresh(); // Refresh AOS after new content is rendered
+                    // Initialize VanillaTilt for newly rendered note cards
+                    VanillaTilt.init(notesGrid.querySelectorAll(".note-card"));
+                })
+                .catch(error => {
+                    console.error('Error fetching notes:', error);
+                    if (notesGrid) {
+                        notesGrid.innerHTML = '<p style="color: red;">Failed to load notes. Is the server running correctly?</p>';
+                    }
+                });
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            if (currentDepartment && departmentNotes[currentDepartment]) {
+                const filteredNotes = departmentNotes[currentDepartment].filter(note => {
+                    const title = (note.title || note.fileName).toLowerCase();
+                    return title.includes(searchTerm);
+                });
+                renderNotes(filteredNotes, currentDepartment);
+            }
+        });
+    </script>
+</body>
+</html>

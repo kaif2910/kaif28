@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Documentation: College Notes</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1, h2, h3 {
+            font-family: serif;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 1em;
+            overflow-x: auto;
+        }
+        code {
+            font-family: monospace;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Project Documentation: College Notes</h1>
+
+    <h2>1. Description</h2>
+    <p>This project is a simple web application for sharing college notes. It provides a web interface to view and download notes in PDF format. It also includes a password-protected admin panel for uploading new notes.</p>
+
+    <h2>2. Code</h2>
+
+    <h3><code>server.js</code></h3>
+    <pre><code>
+const express = require('express');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+
+const app = express();
+const port = 5500;
+const host = '192.168.0.124';
+
+const UPLOAD_PASSWORD = 'admin';
+
+// Middleware
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// Multer setup
+const storage = multer.diskStorage({
+    destination: 'notes/',
+    filename: (req, file, cb) => {
+        cb(null, file.originalname);
+    }
+});
+const upload = multer({ storage: storage });
+
+// API Routes
+app.get('/api/notes', (req, res) => {
+    fs.readdir(path.join(__dirname, 'notes'), (err, files) => {
+        if (err) {
+            console.error("Error reading notes directory:", err);
+            return res.status(500).json({ error: 'Failed to read notes directory' });
+        }
+        const pdfFiles = files
+            .filter(file => path.extname(file).toLowerCase() === '.pdf')
+            .map(file => ({
+                title: path.basename(file, '.pdf'),
+                fileName: file
+            }));
+        res.json(pdfFiles);
+    });
+});
+
+app.post('/api/upload', upload.single('note'), (req, res) => {
+    if (!req.body.password || req.body.password !== UPLOAD_PASSWORD) {
+        if (req.file) {
+            fs.unlink(req.file.path, (err) => {
+                if (err) console.error("Error deleting temp file:", err);
+            });
+        }
+        return res.status(401).send('Unauthorized. Incorrect password.');
+    }
+    if (!req.file) {
+        return res.status(400).send('No file uploaded.');
+    }
+    res.send('File uploaded successfully!');
+});
+
+// Static file serving
+app.use('/notes', express.static(path.join(__dirname, 'notes')));
+app.use(express.static(path.join(__dirname, 'public'))); // Serve files from public dir
+
+// Fallback to serve index.html for any other request
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.listen(port, host, () => {
+    console.log(`Server listening at http://${host}:${port}`);
+});
+    </code></pre>
+
+    <h3><code>public/index.html</code></h3>
+    <pre><code>
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;College Notes by kaif&lt;/title&gt;
+    &lt;style&gt;
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+        }
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #ccc;
+        }
+        h1 {
+            margin: 0;
+        }
+        .notes-container {
+            margin-top: 20px;
+        }
+        .note-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .note-item h3 {
+            margin: 0;
+        }
+        .download-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .admin-panel {
+            background-color: #f2f2f2;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .admin-panel .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .admin-panel input, .admin-panel button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;header&gt;
+        &lt;h1&gt;College Notes by kaif&lt;/h1&gt;
+        &lt;p&gt;A place to find and share notes.&lt;/p&gt;
+    &lt;/header&gt;
+
+    &lt;div class="admin-panel"&gt;
+        &lt;h2&gt;Admin Panel&lt;/h2&gt;
+        &lt;div class="container"&gt;
+            &lt;h3&gt;Upload a New Note&lt;/h3&gt;
+            &lt;form action="/api/upload" method="post" enctype="multipart/form-data"&gt;
+                &lt;label for="password"&gt;Password:&lt;/label&gt;
+                &lt;input type="password" id="password" name="password" required&gt;
+
+                &lt;label for="note"&gt;Select a PDF file:&lt;/label&gt;
+                &lt;input type="file" id="note" name="note" accept=".pdf" required&gt;
+
+                &lt;button type="submit"&gt;Upload&lt;/button&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="notes-container" id="notes-list"&gt;
+        &lt;!-- Notes will be added here dynamically --&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+        const notesList = document.getElementById('notes-list');
+        const uploadForm = document.querySelector('form');
+
+        function renderNotes(notes) {
+            notesList.innerHTML = '';
+            notes.forEach(note => {
+                const noteElement = document.createElement('div');
+                noteElement.classList.add('note-item');
+
+                const noteTitle = document.createElement('h3');
+                noteTitle.textContent = note.title;
+
+                const downloadLink = document.createElement('a');
+                downloadLink.classList.add('download-btn');
+                downloadLink.href = `/notes/${note.fileName}`;
+                downloadLink.textContent = 'Download';
+                downloadLink.download = note.fileName;
+
+                noteElement.appendChild(noteTitle);
+                noteElement.appendChild(downloadLink);
+
+                notesList.appendChild(noteElement);
+            });
+        }
+
+        function fetchNotes() {
+            fetch('/api/notes')
+                .then(response => response.json())
+                .then(notes => {
+                    renderNotes(notes);
+                })
+                .catch(error => {
+                    console.error('Error fetching notes:', error);
+                    notesList.innerHTML = '&lt;p&gt;Could not load notes. Please try again later.&lt;/p&gt;';
+                });
+        }
+
+        uploadForm.addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent the default form submission
+
+            const formData = new FormData(uploadForm);
+
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                }
+                throw new Error('Upload failed. Check password or file.');
+            })
+            .then(message => {
+                alert(message); // Show success message
+                fetchNotes(); // Refresh the notes list
+                uploadForm.reset(); // Clear the form
+            })
+            .catch(error => {
+                alert(error.message);
+            });
+        });
+
+        // Initial fetch of notes when the page loads
+        fetchNotes();
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+    </code></pre>
+
+    <h2>3. Screenshots</h2>
+    <p><em>Please insert your screenshots in this section.</em></p>
+
+    <h3>Screenshot 1: Main Page</h3>
+    <p><em>(insert screenshot here)</em></p>
+    <img src="path/to/your/screenshot1.png" alt="Main Page">
+
+    <h3>Screenshot 2: Admin Panel</h3>
+    <p><em>(insert screenshot here)</em></p>
+    <img src="path/to/your/screenshot2.png" alt="Admin Panel">
+
+    <h3>Screenshot 3: Notes List</h3>
+    <p><em>(insert screenshot here)</em></p>
+    <img src="path/to/your/screenshot3.png" alt="Notes List">
+
+    <h3>Screenshot 4: Successful Upload</h3>
+    <p><em>(insert screenshot here)</em></p>
+    <img src="path/to/your/screenshot4.png" alt="Successful Upload">
+
+    <h3>Screenshot 5: Failed Upload</h3>
+    <p><em>(insert screenshot here)</em></p>
+    <img src="path/to/your/screenshot5.png" alt="Failed Upload">
+
+</body>
+</html>
