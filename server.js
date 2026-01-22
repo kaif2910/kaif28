@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const port = 5500;
+const port = process.env.PORT || 5500; // Use process.env.PORT for Render
 const host = '0.0.0.0';
 
 const UPLOAD_PASSWORD = '1234';
@@ -101,15 +101,11 @@ app.get('/shaalaa', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'notes_buddy.html'));
 });
 
-// Serve the new style sheet specifically for the new design
-app.use('/new_style.css', express.static(path.join(__dirname, 'public', 'new_style.css')));
-
 // Fallback to serve index.html for any other request (original design)
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(port, host, () => {
-    console.log(`Server listening at http://localhost:${port}`);
-    console.log(`Network access via: http://<your-ip>:${port}`);
+app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
 });
