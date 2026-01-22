@@ -91,19 +91,9 @@ app.post('/api/upload', upload.single('note'), (req, res) => {
 app.use('/notes', express.static(NOTES_DIR));
 app.use(express.static(path.join(__dirname, 'public'))); // Serve files from public dir
 
-// Serve the new design at /new
-app.get('/new', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'new_index.html'));
-});
-
-// Serve the Shaalaa clone project
-app.get('/shaalaa', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'notes_buddy.html'));
-});
-
-// Fallback to serve notes_buddy.html for any other request
+// Fallback to serve notesshelf.html for any other request
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'notes_buddy.html'));
+  res.sendFile(path.join(__dirname, 'public', 'notesshelf.html'));
 });
 
 app.listen(port, () => {
