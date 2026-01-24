@@ -780,97 +780,84 @@
             feedbackDiv.style.display = 'block';
         }
 
-        function renderNotes(notes, department) {
-            const notesGrid = document.querySelector(`#${department}-section .notes-grid`);
-            if (!notesGrid) return;
-
-            notesGrid.innerHTML = ''; // Clear spinner or previous content
-            
-            if (notes.length === 0) {
-                notesGrid.innerHTML = '<p>No notes available for this department yet.</p>';
-                return;
-            }
-
-            notes.forEach(note => {
-                const card = document.createElement('div');
-                card.className = 'note-card';
-                card.setAttribute('data-aos', 'fade-up');
-                card.setAttribute('data-tilt', '');
-                const title = note.title || note.fileName;
-                const fileType = 'PDF Document';
-                
-                card.innerHTML = `
-                    <h3>${title}</h3>
-                    <div class="note-meta">${fileType}</div>
-                    <a href="/notes/${department}/${note.fileName}" class="download-link" download="${note.fileName}">
-                        Download PDF
-                    </a>
-                `;
-                notesGrid.appendChild(card);
-            });
-        }
-
-        function fetchNotes(department) {
-            const notesGrid = document.querySelector(`#${department}-section .notes-grid`);
-            if (!notesGrid) return;
-
-            notesGrid.innerHTML = '<div class="spinner"></div>'; // Show spinner
-
-            fetch(`/api/notes?department=${department}`)
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(notes => {
-                    renderNotes(notes, department);
-                    AOS.refresh(); // Refresh AOS after new content is rendered
-                    // Initialize VanillaTilt for newly rendered note cards
-                    VanillaTilt.init(notesGrid.querySelectorAll(".note-card"));
-                })
-                .catch(error => {
-                    console.error('Error fetching notes:', error);
-                    if (notesGrid) {
-                        notesGrid.innerHTML = '<p style="color: red;">Failed to load notes. Is the server running correctly?</p>';
-                    }
-                });
-                   }
-
-
         
         uploadForm.addEventListener('submit', (event) => {
             event.preventDefault();
-            const formData = new FormData(uploadForm);
-            const department = formData.get('department');
+            const password = document.getElementById('password').value;
+            const department = document.getElementById('department').value;
+            const noteFile = document.getElementById('note').files[0];
             const submitBtn = uploadForm.querySelector('button');
             const originalText = submitBtn.textContent;
 
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Uploading...';
-            feedbackDiv.style.display = 'none'; // Hide old feedback
+            if (!noteFile) {
+                showUploadFeedback('Please select a file.', true);
+                return;
+            }
 
-            fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.ok) return response.text();
-                if (response.status === 401) throw new Error('Incorrect password.');
-                throw new Error('Upload failed. Please try again.');
-            })
-            .then(message => {
-                showUploadFeedback(message, false);
-                uploadForm.reset();
-                showSection(department); 
-            })
-            .catch(error => {
-                showUploadFeedback(error.message, true);
-            })
-            .finally(() => {
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-            });
+            const reader = new FileReader();
+            reader.readAsDataURL(noteFile);
+            reader.onload = () => {
+                const noteContent = reader.result.split(',')[1];
+                const payload = {
+                    password: password,
+                    department: department,
+                    title: noteFile.name,
+                    note: noteContent,
+                };
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Uploading...';
+                feedbackDiv.style.display = 'none';
+
+                fetch('/api/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                })
+                .then(response => {
+                    if (response.ok) return response.text();
+                    if (response.status === 401) throw new Error('Incorrect password.');
+                    throw new Error('Upload failed. Please try again.');
+                })
+                .then(message => {
+                    showUploadFeedback(message, false);
+                    uploadForm.reset();
+                    showSection(department); 
+                })
+                .catch(error => {
+                    showUploadFeedback(error.message, true);
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                });
+            };
+            reader.onerror = () => {
+                showUploadFeedback('Error reading file.', true);
+            };
         });
 
+        function downloadNote(noteId, fileName) {
+            fetch(`/api/notes/${noteId}`)
+                .then(response => response.json())
+                .then(note => {
+                    const byteCharacters = atob(note.content);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: 'application/pdf' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+        }
         const darkModeToggle = document.getElementById('dark-mode-toggle');
 
         darkModeToggle.addEventListener('click', (e) => {
@@ -923,13 +910,13 @@
                 card.className = 'note-card';
                 card.setAttribute('data-aos', 'fade-up');
                 card.setAttribute('data-tilt', '');
-                const title = note.title || note.fileName;
+                const title = note.title;
                 const fileType = 'PDF Document';
                 
                 card.innerHTML = `
                     <h3>${title}</h3>
                     <div class="note-meta">${fileType}</div>
-                    <a href="/notes/${department}/${note.fileName}" class="download-link" download="${note.fileName}">
+                    <a href="#" class="download-link" onclick="downloadNote('${note.id}', '${note.title}')">
                         Download PDF
                     </a>
                 `;
