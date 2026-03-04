@@ -2,8 +2,9 @@
   "name": "clg-pj",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
+    "build": "echo 'No build step required'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,6 +13,7 @@
   "dependencies": {
     "dotenv": "^17.2.3",
     "express": "^4.19.2",
-    "pg": "^8.17.2"
+    "pg": "^8.17.2",
+    "serverless-http": "^4.0.0"
   }
 }

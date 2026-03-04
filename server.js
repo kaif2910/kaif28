@@ -66,12 +66,16 @@ app.post('/api/upload', async (req, res) => {
 // Static file serving for all notes within their subdirectories
 app.use(express.static(path.join(__dirname, 'public'))); // Serve files from public dir
 
-// Fallback to serve notesshelf.html for any other request
+// Fallback to serve index.html for any other request
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'notesshelf.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(port, async () => {
-    await db.createTable();
-    console.log(`Server listening on port ${port}`);
-});
+module.exports = app;
+
+if (require.main === module) {
+  app.listen(port, async () => {
+      await db.createTable();
+      console.log(`Server listening on port ${port}`);
+  });
+}
