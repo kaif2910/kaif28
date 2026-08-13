@@ -29,6 +29,17 @@ app.get('/api/notes', async (req, res) => {
     }
 });
 
+// API to get ALL notes (for admin dashboard)
+app.get('/api/notes/all', async (req, res) => {
+    try {
+        const notes = await db.getAllNotes();
+        res.json(notes);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error fetching all notes');
+    }
+});
+
 // API to get a single note by ID
 app.get('/api/notes/:id', async (req, res) => {
     try {
@@ -61,6 +72,30 @@ app.post('/api/upload', async (req, res) => {
         console.error(error);
         res.status(500).send('Error uploading note');
     }
+});
+
+// API to delete a note (password protected)
+app.delete('/api/notes/:id', async (req, res) => {
+    if (!req.body.password || req.body.password !== UPLOAD_PASSWORD) {
+        return res.status(401).send('Unauthorized. Incorrect password.');
+    }
+
+    try {
+        const deleted = await db.deleteNote(req.params.id);
+        if (deleted) {
+            res.json({ message: 'Note deleted successfully', note: deleted });
+        } else {
+            res.status(404).send('Note not found');
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error deleting note');
+    }
+});
+
+// Serve admin dashboard
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 // Static file serving for all notes within their subdirectories

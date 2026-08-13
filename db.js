@@ -28,6 +28,12 @@ const getNotes = async (department) => {
   return rows;
 };
 
+const getAllNotes = async () => {
+  const query = 'SELECT id, title, department FROM notes ORDER BY id DESC';
+  const { rows } = await pool.query(query);
+  return rows;
+};
+
 const getNoteById = async (id) => {
   const query = 'SELECT * FROM notes WHERE id = $1';
   const { rows } = await pool.query(query, [id]);
@@ -40,9 +46,17 @@ const createNote = async (title, department, content) => {
   return rows[0];
 };
 
+const deleteNote = async (id) => {
+  const query = 'DELETE FROM notes WHERE id = $1 RETURNING *';
+  const { rows } = await pool.query(query, [id]);
+  return rows[0];
+};
+
 module.exports = {
   createTable,
   getNotes,
+  getAllNotes,
   getNoteById,
   createNote,
+  deleteNote,
 };
