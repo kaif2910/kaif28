@@ -498,6 +498,7 @@ main {
 
 /* ===== SWIPER CAROUSEL ===== */
 .swiper {
+    width: 100%;
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: var(--shadow-lg);
@@ -1331,7 +1332,15 @@ body.dark-mode {
                         byteNumbers[i] = byteCharacters.charCodeAt(i);
                     }
                     const byteArray = new Uint8Array(byteNumbers);
-                    const blob = new Blob([byteArray], { type: 'application/pdf' });
+                    
+                    let mimeType = 'application/pdf';
+                    if (fileName.toLowerCase().endsWith('.ppt')) {
+                        mimeType = 'application/vnd.ms-powerpoint';
+                    } else if (fileName.toLowerCase().endsWith('.pptx')) {
+                        mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+                    }
+                    
+                    const blob = new Blob([byteArray], { type: mimeType });
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
                     link.download = fileName;
@@ -1393,13 +1402,19 @@ body.dark-mode {
                 card.setAttribute('data-aos', 'fade-up');
                 card.setAttribute('data-tilt', '');
                 const title = note.title;
-                const fileType = 'PDF Document';
+                let fileType = 'PDF Document';
+                let downloadText = 'Download PDF';
+                
+                if (title.toLowerCase().endsWith('.ppt') || title.toLowerCase().endsWith('.pptx')) {
+                    fileType = 'PowerPoint Presentation';
+                    downloadText = 'Download PPT';
+                }
                 
                 card.innerHTML = `
                     <h3>${title}</h3>
                     <div class="note-meta">${fileType}</div>
-                    <a href="#" class="download-link" onclick="downloadNote('${note.id}', '${note.title}')">
-                        Download PDF
+                    <a href="#" class="download-link" onclick="downloadNote('${note.id}', '${note.title.replace(/'/g, "\\'")}')">
+                        ${downloadText}
                     </a>
                 `;
                 notesGrid.appendChild(card);
