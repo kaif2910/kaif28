@@ -17,11 +17,12 @@ app.use(express.json({ limit: '50mb' })); // Increase limit for base64 encoded f
 // API to get notes for a specific department
 app.get('/api/notes', async (req, res) => {
     const department = req.query.department;
+    const semester = req.query.semester;
     if (!department) {
         return res.json([]);
     }
     try {
-        const notes = await db.getNotes(department);
+        const notes = await db.getNotes(department, semester);
         res.json(notes);
     } catch (error) {
         console.error(error);
@@ -66,7 +67,8 @@ app.post('/api/upload', async (req, res) => {
     }
 
     try {
-        await db.createNote(req.body.title, req.body.department, req.body.note);
+        const semester = req.body.semester || 'all';
+        await db.createNote(req.body.title, req.body.department, semester, req.body.note);
         res.send('File uploaded successfully!');
     } catch (error) {
         console.error(error);

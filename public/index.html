@@ -635,7 +635,8 @@ main {
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+select.semester-filter {
     padding: 11px 14px;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
@@ -649,7 +650,8 @@ main {
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+select.semester-filter:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px var(--primary-glow), inset 0 1px 3px rgba(0,0,0,0.03);
     background: rgba(255,255,255,0.8);
@@ -909,19 +911,22 @@ body.dark-mode {
 }
 
 .dark-mode .form-group input,
-.dark-mode .form-group select {
+.dark-mode .form-group select,
+.dark-mode select.semester-filter {
     background: rgba(255,255,255,0.05);
     border-color: var(--border-subtle);
     color: var(--text-primary);
 }
 
-.dark-mode .form-group select option {
+.dark-mode .form-group select option,
+.dark-mode select.semester-filter option {
     background: #1a1d23;
     color: #e4e6eb;
 }
 
 .dark-mode .form-group input:focus,
-.dark-mode .form-group select:focus {
+.dark-mode .form-group select:focus,
+.dark-mode select.semester-filter:focus {
     background: rgba(255,255,255,0.08);
 }
 
@@ -1076,7 +1081,7 @@ body.dark-mode {
                 <li><a class="section-link" onclick="showSection('bsc_cs'); closeNav();">BSC CS</a></li>
                 <li><a class="section-link" onclick="showSection('bsc_ds'); closeNav();">BSC DS</a></li>
                 <li><a class="section-link" onclick="showSection('bsc_aiml'); closeNav();">BSC AI/ML</a></li>
-                <li><a class="section-link" onclick="showSection('question_papers'); closeNav();">Question Papers</a></li>
+                <li><a class="section-link" onclick="showSection('question_papers'); closeNav();">Previous Year Question Papers (PYQs)</a></li>
             </ul>
         </div>
     </nav>
@@ -1092,7 +1097,7 @@ body.dark-mode {
                     <li><a id="nav-bsc_cs" class="section-link" onclick="showSection('bsc_cs')">BSC CS</a></li>
                     <li><a id="nav-bsc_ds" class="section-link" onclick="showSection('bsc_ds')">BSC DS</a></li>
                     <li><a id="nav-bsc_aiml" class="section-link" onclick="showSection('bsc_aiml')">BSC AI/ML</a></li>
-                    <li><a id="nav-question_papers" class="section-link" onclick="showSection('question_papers')">Question Papers</a></li>
+                    <li><a id="nav-question_papers" class="section-link" onclick="showSection('question_papers')">Previous Year Question Papers (PYQs)</a></li>
                 </ul>
             </nav>
         </aside>
@@ -1130,27 +1135,82 @@ body.dark-mode {
                 </section>
 
                 <section id="bscit-section" style="display: none;">
-                    <h2>BSCIT - Notes & Solutions</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); margin-bottom: 24px; padding-bottom: 14px;">
+                        <h2 style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">BSCIT - Notes & Solutions</h2>
+                        <select class="semester-filter" data-dept="bscit" onchange="filterBySemester('bscit', this.value)" style="padding: 8px; border-radius: 4px;">
+                            <option value="all">All Semesters</option>
+                            <option value="sem1">Semester 1</option>
+                            <option value="sem2">Semester 2</option>
+                            <option value="sem3">Semester 3</option>
+                            <option value="sem4">Semester 4</option>
+                            <option value="sem5">Semester 5</option>
+                            <option value="sem6">Semester 6</option>
+                        </select>
+                    </div>
                     <div class="notes-grid"></div>
                 </section>
 
                 <section id="bsc_cs-section" style="display: none;">
-                     <h2>BSC CS - Notes & Solutions</h2>
+                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); margin-bottom: 24px; padding-bottom: 14px;">
+                        <h2 style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">BSC CS - Notes & Solutions</h2>
+                        <select class="semester-filter" data-dept="bsc_cs" onchange="filterBySemester('bsc_cs', this.value)" style="padding: 8px; border-radius: 4px;">
+                            <option value="all">All Semesters</option>
+                            <option value="sem1">Semester 1</option>
+                            <option value="sem2">Semester 2</option>
+                            <option value="sem3">Semester 3</option>
+                            <option value="sem4">Semester 4</option>
+                            <option value="sem5">Semester 5</option>
+                            <option value="sem6">Semester 6</option>
+                        </select>
+                    </div>
                     <div class="notes-grid"><p>Coming Soon...</p></div>
                 </section>
 
                 <section id="bsc_ds-section" style="display: none;">
-                     <h2>BSC DS - Notes & Solutions</h2>
+                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); margin-bottom: 24px; padding-bottom: 14px;">
+                        <h2 style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">BSC DS - Notes & Solutions</h2>
+                        <select class="semester-filter" data-dept="bsc_ds" onchange="filterBySemester('bsc_ds', this.value)" style="padding: 8px; border-radius: 4px;">
+                            <option value="all">All Semesters</option>
+                            <option value="sem1">Semester 1</option>
+                            <option value="sem2">Semester 2</option>
+                            <option value="sem3">Semester 3</option>
+                            <option value="sem4">Semester 4</option>
+                            <option value="sem5">Semester 5</option>
+                            <option value="sem6">Semester 6</option>
+                        </select>
+                    </div>
                     <div class="notes-grid"><p>Coming Soon...</p></div>
                 </section>
 
                 <section id="bsc_aiml-section" style="display: none;">
-                     <h2>BSC AI/ML - Notes & Solutions</h2>
+                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); margin-bottom: 24px; padding-bottom: 14px;">
+                        <h2 style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">BSC AI/ML - Notes & Solutions</h2>
+                        <select class="semester-filter" data-dept="bsc_aiml" onchange="filterBySemester('bsc_aiml', this.value)" style="padding: 8px; border-radius: 4px;">
+                            <option value="all">All Semesters</option>
+                            <option value="sem1">Semester 1</option>
+                            <option value="sem2">Semester 2</option>
+                            <option value="sem3">Semester 3</option>
+                            <option value="sem4">Semester 4</option>
+                            <option value="sem5">Semester 5</option>
+                            <option value="sem6">Semester 6</option>
+                        </select>
+                    </div>
                     <div class="notes-grid"><p>Coming Soon...</p></div>
                 </section>
 
                 <section id="question_papers-section" style="display: none;">
-                     <h2>Question Papers</h2>
+                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); margin-bottom: 24px; padding-bottom: 14px;">
+                        <h2 style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">Previous Year Question Papers (PYQs)</h2>
+                        <select class="semester-filter" data-dept="question_papers" onchange="filterBySemester('question_papers', this.value)" style="padding: 8px; border-radius: 4px;">
+                            <option value="all">All Semesters</option>
+                            <option value="sem1">Semester 1</option>
+                            <option value="sem2">Semester 2</option>
+                            <option value="sem3">Semester 3</option>
+                            <option value="sem4">Semester 4</option>
+                            <option value="sem5">Semester 5</option>
+                            <option value="sem6">Semester 6</option>
+                        </select>
+                    </div>
                     <div class="notes-grid"><p>Coming Soon...</p></div>
                 </section>
             </div>
@@ -1170,7 +1230,7 @@ body.dark-mode {
             <div class="footer-col" data-aos="fade-up">
                 <h4>Resources</h4>
                 <ul>
-                    <li><a href="#">Question Papers</a></li>
+                    <li><a href="#">Previous Year Question Papers (PYQs)</a></li>
                     <li><a href="#">Textbook Solutions</a></li>
                     <li><a href="#">PRACTICAL BOOKS </a></li>
                 </ul>
@@ -1349,11 +1409,19 @@ body.dark-mode {
         function fetchNotes(department) {
             currentDepartment = department;
             const notesGrid = document.querySelector(`#${department}-section .notes-grid`);
+            const semesterDropdown = document.querySelector(`.semester-filter[data-dept="${department}"]`);
+            const semester = semesterDropdown ? semesterDropdown.value : 'all';
+            
             if (!notesGrid) return;
 
             notesGrid.innerHTML = '<div class="spinner"></div>'; // Show spinner
 
-            fetch(`/api/notes?department=${department}`)
+            let url = `/api/notes?department=${department}`;
+            if (semester !== 'all') {
+                url += `&semester=${semester}`;
+            }
+
+            fetch(url)
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
@@ -1371,6 +1439,10 @@ body.dark-mode {
                         notesGrid.innerHTML = '<p style="color: red;">Failed to load notes. Is the server running correctly?</p>';
                     }
                 });
+        }
+
+        function filterBySemester(department, semester) {
+            fetchNotes(department);
         }
 
         searchInput.addEventListener('input', (e) => {

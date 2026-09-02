@@ -528,7 +528,19 @@
                                 <option value="bsc_cs">BSC CS</option>
                                 <option value="bsc_ds">BSC DS</option>
                                 <option value="bsc_aiml">BSC AI/ML</option>
-                                <option value="question_papers">Question Papers</option>
+                                <option value="question_papers">Previous Year Question Papers (PYQs)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="semester">Semester</label>
+                            <select id="semester" name="semester">
+                                <option value="all">All Semesters</option>
+                                <option value="sem1">Semester 1</option>
+                                <option value="sem2">Semester 2</option>
+                                <option value="sem3">Semester 3</option>
+                                <option value="sem4">Semester 4</option>
+                                <option value="sem5">Semester 5</option>
+                                <option value="sem6">Semester 6</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -554,7 +566,7 @@
                                 <option value="bsc_cs">BSC CS</option>
                                 <option value="bsc_ds">BSC DS</option>
                                 <option value="bsc_aiml">BSC AI/ML</option>
-                                <option value="question_papers">Question Papers</option>
+                                <option value="question_papers">Previous Year Question Papers (PYQs)</option>
                             </select>
                         </div>
                         <div id="notes-container"></div>
@@ -631,6 +643,7 @@
         uploadForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const department = document.getElementById('department').value;
+            const semester = document.getElementById('semester').value;
             const noteFile = document.getElementById('note').files[0];
             const submitBtn = uploadForm.querySelector('button');
             const originalText = submitBtn.textContent;
@@ -654,6 +667,7 @@
                     body: JSON.stringify({
                         password: adminPassword,
                         department: department,
+                        semester: semester,
                         title: noteFile.name,
                         note: noteContent,
                     }),
@@ -713,7 +727,7 @@
                 <div class="note-row" style="animation-delay: ${i * 0.03}s">
                     <div class="note-info">
                         <div class="note-title">${note.title}</div>
-                        <div class="note-dept">${note.department.replace('_', ' ')}</div>
+                        <div class="note-dept">${note.department.replace('_', ' ')} ${note.semester ? ' | ' + note.semester : ''}</div>
                     </div>
                     <div class="note-actions">
                         <button class="btn btn-danger" onclick="confirmDelete(${note.id}, '${note.title.replace(/'/g, "\\'")}')">Delete</button>
